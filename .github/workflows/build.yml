@@ -16,7 +16,7 @@ jobs:
         prepare: |
           pkg install -y jq node20 npm-node20 wget curl git gcc bash gawk gsed
         run: |
-          export LATEST_APP=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')
+          export LATEST_APP=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print $4;exit}')
           git clone -b $LATEST_APP https://github.com/LLM-Red-Team/kimi-free-api
           npm i
           npm run build
@@ -31,7 +31,7 @@ jobs:
 
     - name: Generate release tag
       id: tag
-      run: echo "release_tag=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')" >> $GITHUB_OUTPUT
+      run: echo "release_tag=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print $4;exit}')" >> $GITHUB_OUTPUT
 
     - name: Create release
       uses: softprops/action-gh-release@v1
