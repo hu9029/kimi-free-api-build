@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: compare versions
         run: |
-          export REMOTEVERSION=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')
+          export REMOTEVERSION=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print $4;exit}')
           export LOCALVERSION=$(curl --location --silent --fail --show-error "https://api.github.com/repos/hu9029/kimi-free-api-build/releases/latest" | grep -oP '"tag_name":\s*"\K[^"]+')
           bash compare.sh
           
