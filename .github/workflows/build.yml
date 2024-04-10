@@ -1,0 +1,51 @@
+name: Build kimi-free-api
+
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Build kimi-free-api
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build kimi-free-api
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        release: 13.2
+        prepare: |
+          pkg install -y jq node20 npm-node20 wget curl git gcc bash gawk gsed
+        run: |
+          export LATEST_APP=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')
+          git clone -b $LATEST_APP https://github.com/LLM-Red-Team/kimi-free-api
+          npm i
+          npm run build
+          tar -czf dist.tar.gz dist
+          
+    - name: Upload artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: kimi-free-api-build
+        path: |
+            kimi-free-api/dist.tar.gz
+
+    - name: Generate release tag
+      id: tag
+      run: echo "release_tag=$(wget -qO- https://api.github.com/repos/LLM-Red-Team/kimi-free-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')" >> $GITHUB_OUTPUT
+
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        files: |
+              kimi-free-api/dist.tar.gz
+              
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+        token: ${{ github.token }}
+        repository: ${{ github.repository }}
+        retain_days: 1
+        keep_minimum_runs: 8
