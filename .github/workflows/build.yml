@@ -6,6 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Build kimi-free-api
+    permissions:
+      contents: write
+      packages: write
     steps:
     - uses: actions/checkout@v4
     - name: Build kimi-free-api
